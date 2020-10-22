@@ -64,7 +64,7 @@ func RunServer() error {
 
 func main() {
 	if err := RunServer(); err != nil {
-		fmt.Fprint(os.Stderr, "%v\n", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }
