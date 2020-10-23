@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	v1 "github.com/Fish-pro/grpc-demo/api/proto/v1"
+	serviceV1 "github.com/Fish-pro/grpc-demo/api/service/v1"
 	"github.com/Fish-pro/grpc-demo/config"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -12,13 +14,15 @@ import (
 	"strings"
 )
 
-func GRPCServer(ctx context.Context, v1API v1.ToDoServiceServer, port string) {
-	listen, err := net.Listen("tcp", ":"+port)
+func GRPCServer(ctx context.Context, db *sql.DB, cfg *config.Config) {
+	listen, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("gRPC listen error:%v", err)
 	}
+
 	server := grpc.NewServer()
-	v1.RegisterToDoServiceServer(server, v1API)
+	v1ToDoAPI := serviceV1.NewToDoServiceServer(db)
+	v1.RegisterToDoServiceServer(server, v1ToDoAPI)
 
 	log.Println("starting gRPC server...")
 	err = server.Serve(listen)

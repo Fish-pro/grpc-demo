@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	v1 "github.com/Fish-pro/grpc-demo/api/service/v1"
 	"github.com/Fish-pro/grpc-demo/config"
 	"github.com/Fish-pro/grpc-demo/server"
 	"log"
@@ -30,9 +29,7 @@ func RunServer() error {
 	}
 	defer db.Close()
 
-	v1API := v1.NewToDoServiceServer(db)
-
-	go server.GRPCServer(ctx, v1API, cfg.GRPCPort)
+	go server.GRPCServer(ctx, db, cfg)
 
 	go server.HttpServer(ctx, cfg)
 
