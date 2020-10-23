@@ -56,3 +56,8 @@ func HttpServer(ctx context.Context, cfg *config.Config) {
 
 	<-ctx.Done()
 }
+
+func serveSwaggerUI(mux *http.ServeMux) {
+	dir := "swagger"
+	mux.Handle("/api/", http.StripPrefix("/api/", http.FileServer(http.Dir(dir))))
+}
