@@ -87,6 +87,10 @@ func (s *ToDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 	if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("query data error:%s", err.Error()))
 	}
+	td.Reminder, err = ptypes.TimestampProto(reminder)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, fmt.Sprintf("reminder error:%s", err.Error()))
+	}
 	if rows.Next() {
 		return nil, status.Error(codes.Unknown, fmt.Sprintf("query many data ID=%d", req.Id))
 	}
@@ -168,14 +172,14 @@ func (s *ToDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest)
 	}
 	defer rows.Close()
 
-	var remainder time.Time
+	var reminder time.Time
 	list := []*v1.ToDo{}
 	for rows.Next() {
 		td := new(v1.ToDo)
-		if err := rows.Scan(&td.Id, &td.Title, &td.Description, &remainder); err != nil {
+		if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
 			return nil, status.Error(codes.Unknown, fmt.Sprintf("query error:%s", err.Error()))
 		}
-		td.Reminder, err = ptypes.TimestampProto(remainder)
+		td.Reminder, err = ptypes.TimestampProto(reminder)
 		if err != nil {
 			return nil, status.Error(codes.Unknown, fmt.Sprintf("reminder error:%s", err.Error()))
 		}
