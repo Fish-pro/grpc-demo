@@ -1,2 +1,3 @@
-cd api/proto/v1/
-protoc --go_out=plugins=grpc:. *.proto
+cd api/proto/v1/ &&
+protoc --go_out=plugins=grpc:.  *.proto
+protoc --grpc-gateway_out=logtostderr=true:. *.proto

@@ -12,7 +12,7 @@ import (
 const apiVsersion = "v1"
 
 func main() {
-	conn, err := grpc.Dial(":8080", grpc.WithInsecure())
+	conn, err := grpc.Dial(":8081", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("failed to connect server:", err)
 	}

@@ -5,48 +5,22 @@ import (
 	"database/sql"
 	"fmt"
 	v1 "github.com/Fish-pro/grpc-demo/api/service/v1"
+	"github.com/Fish-pro/grpc-demo/config"
 	"github.com/Fish-pro/grpc-demo/server"
+	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
-type Config struct {
-	GRPCPort string
-	Db       *Db
-}
-
-type Db struct {
-	Host     string
-	User     string
-	Password string
-	DbSchema string
-}
-
-func getEnvOrDefault(key string, def string) string {
-	if val, ok := os.LookupEnv(key); ok {
-		return val
-	} else {
-		return def
-	}
-}
-
-func New() *Config {
-	return &Config{
-		GRPCPort: getEnvOrDefault("GRPC_PORT", "8080"),
-		Db: &Db{
-			Host:     getEnvOrDefault("GRPC_HOST", "127.0.0.1:3306"),
-			User:     getEnvOrDefault("GRPC_DB_USER", "root"),
-			Password: getEnvOrDefault("GRPC_DB_PASSWORD", "dangerous"),
-			DbSchema: getEnvOrDefault("GRPC_DB_SCHEMA", "grpc-demo"),
-		},
-	}
-}
-
 func RunServer() error {
+	cfg := config.New()
 	ctx := context.Background()
-	cfg := New()
+
 	if len(cfg.GRPCPort) == 0 {
 		return fmt.Errorf("invalid TCP port for gRPC server:%s", cfg.GRPCPort)
 	}
+
 	param := "parseTime=true"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", cfg.Db.User, cfg.Db.Password, cfg.Db.Host, cfg.Db.DbSchema, param)
 	db, err := sql.Open("mysql", dsn)
@@ -58,5 +32,18 @@ func RunServer() error {
 
 	v1API := v1.NewToDoServiceServer(db)
 
-	return server.RunServer(ctx, v1API, cfg.GRPCPort)
+	go server.GRPCServer(ctx, v1API, cfg.GRPCPort)
+
+	go server.HttpServer(ctx, cfg)
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("shutdown server ...")
+
+	return nil
 }
