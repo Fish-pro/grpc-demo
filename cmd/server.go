@@ -13,24 +13,25 @@ import (
 )
 
 func RunServer() error {
+	// New Configuration information
 	cfg := config.New()
+	// New context information
 	ctx := context.Background()
 
-	if len(cfg.GRPCPort) == 0 {
-		return fmt.Errorf("invalid TCP port for gRPC server:%s", cfg.GRPCPort)
-	}
-
+	// add database connect information
 	param := "parseTime=true"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", cfg.Db.User, cfg.Db.Password, cfg.Db.Host, cfg.Db.DbSchema, param)
 	db, err := sql.Open("mysql", dsn)
-	fmt.Println(dsn)
+	log.Println("database info>>>", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to connect to mysql:%s", err.Error())
 	}
 	defer db.Close()
 
+	// grpc server
 	go server.GRPCServer(ctx, db, cfg)
 
+	// http server
 	go server.HttpServer(ctx, cfg)
 
 	// Wait for interrupt signal to gracefully shutdown the server

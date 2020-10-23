@@ -17,10 +17,12 @@ type ToDoServiceServer struct {
 	db *sql.DB
 }
 
+// New service server and return interface in pb.go file
 func NewToDoServiceServer(db *sql.DB) v1.ToDoServiceServer {
 	return &ToDoServiceServer{db: db}
 }
 
+// check apiVersion
 func (s *ToDoServiceServer) checkAPI(api string) error {
 	if apiVersion != api {
 		return status.Error(codes.Unimplemented, fmt.Sprintf("unsupported API version:service implements API version '%s',but given '%s'", apiVersion, api))
@@ -28,6 +30,7 @@ func (s *ToDoServiceServer) checkAPI(api string) error {
 	return nil
 }
 
+// connect database
 func (s *ToDoServiceServer) connect(ctx context.Context) (*sql.Conn, error) {
 	c, err := s.db.Conn(ctx)
 	if err != nil {
@@ -36,6 +39,7 @@ func (s *ToDoServiceServer) connect(ctx context.Context) (*sql.Conn, error) {
 	return c, nil
 }
 
+// create tod
 func (s *ToDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (*v1.CreateResponse, error) {
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -62,6 +66,7 @@ func (s *ToDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (
 	return &v1.CreateResponse{Api: apiVersion, Id: id}, nil
 }
 
+// get todoInfo by ID
 func (s *ToDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.ReadResponse, error) {
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -97,6 +102,7 @@ func (s *ToDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 	return &v1.ReadResponse{Api: apiVersion, ToDo: &td}, nil
 }
 
+// update todoInfo by ID
 func (s *ToDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.UpdateResponse, error) {
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -132,6 +138,7 @@ func (s *ToDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (
 	return &v1.UpdateResponse{Api: apiVersion, Updated: rows}, nil
 }
 
+// delete todoInfo by ID
 func (s *ToDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.DeleteResponse, error) {
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -156,6 +163,7 @@ func (s *ToDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (
 	return &v1.DeleteResponse{Api: apiVersion, Deleted: rows}, nil
 }
 
+// Get all todos in version
 func (s *ToDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest) (*v1.ReadAllResponse, error) {
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
