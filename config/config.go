@@ -23,7 +23,7 @@ type Db struct {
 func getBaseDir() string {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("get current path error: %v", err)
+		log.Fatalf("get baseDir path error: %v", err)
 	}
 	return currentDir
 }
