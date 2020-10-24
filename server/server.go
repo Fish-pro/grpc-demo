@@ -38,15 +38,21 @@ func GRPCServer(ctx context.Context, db *sql.DB, cfg *config.Config) {
 
 func HttpServer(ctx context.Context, cfg *config.Config) {
 	// New Mux
-	mux := runtime.NewServeMux()
+	gwmux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	endpoint := strings.Join([]string{cfg.Host, cfg.GRPCPort}, ":")
 
 	// registry handler endpoint
-	err := v1.RegisterToDoServiceHandlerFromEndpoint(ctx, mux, endpoint, opts)
+	err := v1.RegisterToDoServiceHandlerFromEndpoint(ctx, gwmux, endpoint, opts)
 	if err != nil {
 		log.Fatalf("registry http server error:%v", err)
 	}
+
+	// add swagger api
+	mux := http.NewServeMux()
+	mux.Handle("/", gwmux)
+	dir := "/Users/york/go/src/github.com/Fish-pro/grpc-demo/api/proto/swagger"
+	mux.Handle("/api/", http.StripPrefix("/api/", http.FileServer(http.Dir(dir))))
 
 	log.Println("starting http server...")
 	err = http.ListenAndServe(":"+cfg.HttpPort, mux)
@@ -55,9 +61,4 @@ func HttpServer(ctx context.Context, cfg *config.Config) {
 	}
 
 	<-ctx.Done()
-}
-
-func serveSwaggerUI(mux *http.ServeMux) {
-	dir := "swagger"
-	mux.Handle("/api/", http.StripPrefix("/api/", http.FileServer(http.Dir(dir))))
 }
