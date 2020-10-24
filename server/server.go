@@ -11,6 +11,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -51,7 +52,7 @@ func HttpServer(ctx context.Context, cfg *config.Config) {
 	// add swagger api
 	mux := http.NewServeMux()
 	mux.Handle("/", gwmux)
-	dir := "/Users/york/go/src/github.com/Fish-pro/grpc-demo/api/proto/swagger"
+	dir := filepath.Join(cfg.BaseDir, "api/proto/swagger")
 	mux.Handle("/api/", http.StripPrefix("/api/", http.FileServer(http.Dir(dir))))
 
 	log.Println("starting http server...")

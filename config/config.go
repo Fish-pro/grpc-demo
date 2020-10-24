@@ -1,11 +1,15 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 type Config struct {
 	Host     string
 	GRPCPort string
 	HttpPort string
+	BaseDir  string
 	Db       *Db
 }
 
@@ -14,6 +18,14 @@ type Db struct {
 	User     string
 	Password string
 	DbSchema string
+}
+
+func getBaseDir() string {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("get current path error: %v", err)
+	}
+	return currentDir
 }
 
 func getEnvOrDefault(key string, def string) string {
@@ -26,6 +38,7 @@ func getEnvOrDefault(key string, def string) string {
 
 func New() *Config {
 	return &Config{
+		BaseDir:  getBaseDir(),
 		Host:     getEnvOrDefault("RUN_HOST", "localhost"),
 		GRPCPort: getEnvOrDefault("GRPC_PORT", "8081"),
 		HttpPort: getEnvOrDefault("GRPC_PORT", "8080"),
