@@ -27,6 +27,9 @@ func RunServer() error {
 	}
 	defer db.Close()
 
+	// init logger
+	helper.InitLogger(cfg.LogLevel, cfg.TimeFormat)
+
 	// grpc server
 	go server.GRPCServer(ctx, cfg, db)
 

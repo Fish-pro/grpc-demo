@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -13,15 +14,17 @@ const (
 )
 
 type Config struct {
-	Ctx      context.Context
-	Cancel   context.CancelFunc
-	Host     string
-	GRPCPort string
-	HttpPort string
-	BaseDir  string
-	OpenPem  bool
-	Db       *Db
-	Cert     *Certificate
+	Ctx        context.Context
+	Cancel     context.CancelFunc
+	Host       string
+	GRPCPort   string
+	HttpPort   string
+	BaseDir    string
+	OpenPem    bool
+	LogLevel   int
+	TimeFormat string
+	Db         *Db
+	Cert       *Certificate
 }
 
 type Db struct {
@@ -57,6 +60,14 @@ func toBool(val string) bool {
 	return strings.ToLower(val) == "true"
 }
 
+func toIntOrDie(val string) int {
+	r, err := strconv.Atoi(val)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
 func getEnvOrDefault(key string, def string) string {
 	if val, ok := os.LookupEnv(key); ok {
 		return val
@@ -69,13 +80,15 @@ func New() *Config {
 	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), ctxKeyWaitGroup, new(sync.WaitGroup)))
 
 	return &Config{
-		Ctx:      ctx,
-		Cancel:   cancel,
-		BaseDir:  getBaseDir(),
-		Host:     getEnvOrDefault("RUN_HOST", "localhost"),
-		GRPCPort: getEnvOrDefault("GRPC_PORT", "8081"),
-		HttpPort: getEnvOrDefault("GRPC_PORT", "8080"),
-		OpenPem:  toBool(getEnvOrDefault("OPEN_PEM", "true")),
+		Ctx:        ctx,
+		Cancel:     cancel,
+		BaseDir:    getBaseDir(),
+		Host:       getEnvOrDefault("RUN_HOST", "localhost"),
+		GRPCPort:   getEnvOrDefault("GRPC_PORT", "8081"),
+		HttpPort:   getEnvOrDefault("GRPC_PORT", "8080"),
+		OpenPem:    toBool(getEnvOrDefault("OPEN_PEM", "true")),
+		LogLevel:   toIntOrDie(getEnvOrDefault("LOG_LEVEL", "-1")),
+		TimeFormat: getEnvOrDefault("TIME_FORMAT", "2006-01-02 15:04:05"),
 		Db: &Db{
 			Host:     getEnvOrDefault("GRPC_HOST", "127.0.0.1:3306"),
 			User:     getEnvOrDefault("GRPC_DB_USER", "root"),

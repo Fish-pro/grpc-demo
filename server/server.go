@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	v1 "github.com/Fish-pro/grpc-demo/api/proto/v1"
 	serviceV1 "github.com/Fish-pro/grpc-demo/api/service/v1"
+	"github.com/Fish-pro/grpc-demo/cmd/middleware"
 	"github.com/Fish-pro/grpc-demo/config"
 	"github.com/Fish-pro/grpc-demo/helper"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -31,11 +32,12 @@ func GRPCServer(ctx context.Context, cfg *config.Config, db *sql.DB) {
 	// New grpc server
 	var server *grpc.Server
 	// if need certificate
+	opts := []grpc.ServerOption{}
+	opts = middleware.AddLogging(opts)
 	if cfg.OpenPem {
-		server = grpc.NewServer(grpc.Creds(helper.GetServerCred(cfg.Cert)))
-	} else {
-		server = grpc.NewServer()
+		opts = append(opts, grpc.Creds(helper.GetServerCred(cfg.Cert)))
 	}
+	server = grpc.NewServer(opts...)
 	// registry todoServiceServer in version v1
 	v1ToDoAPI := serviceV1.NewToDoServiceServer(db)
 	v1.RegisterToDoServiceServer(server, v1ToDoAPI)
