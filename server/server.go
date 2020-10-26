@@ -6,6 +6,7 @@ import (
 	v1 "github.com/Fish-pro/grpc-demo/api/proto/v1"
 	serviceV1 "github.com/Fish-pro/grpc-demo/api/service/v1"
 	"github.com/Fish-pro/grpc-demo/config"
+	"github.com/Fish-pro/grpc-demo/helper"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"log"
@@ -28,7 +29,13 @@ func GRPCServer(ctx context.Context, cfg *config.Config, db *sql.DB) {
 	}
 
 	// New grpc server
-	server := grpc.NewServer()
+	var server *grpc.Server
+	// if need certificate
+	if cfg.OpenPem {
+		server = grpc.NewServer(grpc.Creds(helper.GetServerCred(cfg.Cert)))
+	} else {
+		server = grpc.NewServer()
+	}
 	// registry todoServiceServer in version v1
 	v1ToDoAPI := serviceV1.NewToDoServiceServer(db)
 	v1.RegisterToDoServiceServer(server, v1ToDoAPI)
@@ -50,7 +57,13 @@ func HttpServer(ctx context.Context, cfg *config.Config) {
 
 	// New Mux
 	gwmux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+	var opts []grpc.DialOption
+	// if need certificate
+	if cfg.OpenPem {
+		opts = []grpc.DialOption{grpc.WithTransportCredentials(helper.GetClientCred())}
+	} else {
+		opts = []grpc.DialOption{grpc.WithInsecure()}
+	}
 	endpoint := strings.Join([]string{cfg.Host, cfg.GRPCPort}, ":")
 
 	// registry handler endpoint

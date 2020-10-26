@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	v1 "github.com/Fish-pro/grpc-demo/api/proto/v1"
+	"github.com/Fish-pro/grpc-demo/helper"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"log"
@@ -12,7 +13,8 @@ import (
 const apiVsersion = "v1"
 
 func main() {
-	conn, err := grpc.Dial(":8081", grpc.WithInsecure())
+	cred := helper.GetClientCred()
+	conn, err := grpc.Dial(":8081", grpc.WithTransportCredentials(cred))
 	if err != nil {
 		log.Fatal("failed to connect server:", err)
 	}

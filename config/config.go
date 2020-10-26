@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -18,7 +19,9 @@ type Config struct {
 	GRPCPort string
 	HttpPort string
 	BaseDir  string
+	OpenPem  bool
 	Db       *Db
+	Cert     *Certificate
 }
 
 type Db struct {
@@ -26,6 +29,12 @@ type Db struct {
 	User     string
 	Password string
 	DbSchema string
+}
+
+type Certificate struct {
+	CaPath  string
+	PemPath string
+	KeyPath string
 }
 
 func GetWaitGroupInCtx(ctx context.Context) *sync.WaitGroup {
@@ -42,6 +51,10 @@ func getBaseDir() string {
 		log.Fatalf("get baseDir path error: %v", err)
 	}
 	return currentDir
+}
+
+func toBool(val string) bool {
+	return strings.ToLower(val) == "true"
 }
 
 func getEnvOrDefault(key string, def string) string {
@@ -62,11 +75,17 @@ func New() *Config {
 		Host:     getEnvOrDefault("RUN_HOST", "localhost"),
 		GRPCPort: getEnvOrDefault("GRPC_PORT", "8081"),
 		HttpPort: getEnvOrDefault("GRPC_PORT", "8080"),
+		OpenPem:  toBool(getEnvOrDefault("OPEN_PEM", "true")),
 		Db: &Db{
 			Host:     getEnvOrDefault("GRPC_HOST", "127.0.0.1:3306"),
 			User:     getEnvOrDefault("GRPC_DB_USER", "root"),
 			Password: getEnvOrDefault("GRPC_DB_PASSWORD", "dangerous"),
 			DbSchema: getEnvOrDefault("GRPC_DB_SCHEMA", "grpc-demo"),
+		},
+		Cert: &Certificate{
+			CaPath:  getEnvOrDefault("CA_PATH", "/Users/york/go/src/github.com/Fish-pro/grpc-demo/cert/ca.pem"),
+			PemPath: getEnvOrDefault("PEM_PATH", "/Users/york/go/src/github.com/Fish-pro/grpc-demo/cert/server.pem"),
+			KeyPath: getEnvOrDefault("KEY_PATH", "/Users/york/go/src/github.com/Fish-pro/grpc-demo/cert/server.key"),
 		},
 	}
 }

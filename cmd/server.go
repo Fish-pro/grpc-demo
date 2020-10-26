@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Fish-pro/grpc-demo/config"
+	"github.com/Fish-pro/grpc-demo/helper"
 	"github.com/Fish-pro/grpc-demo/server"
 	"log"
 	"os"
@@ -20,7 +21,7 @@ func RunServer() error {
 	}()
 
 	// add database connect information
-	db, err := config.InitDb(cfg)
+	db, err := helper.InitDb(cfg)
 	if err != nil {
 		return err
 	}
