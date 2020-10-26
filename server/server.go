@@ -15,7 +15,12 @@ import (
 	"strings"
 )
 
-func GRPCServer(ctx context.Context, db *sql.DB, cfg *config.Config) {
+func GRPCServer(ctx context.Context, cfg *config.Config, db *sql.DB) {
+	// waitGroup add
+	wg := config.GetWaitGroupInCtx(ctx)
+	wg.Add(1)
+	defer wg.Done()
+
 	// New tcp listen
 	listen, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
@@ -38,6 +43,11 @@ func GRPCServer(ctx context.Context, db *sql.DB, cfg *config.Config) {
 }
 
 func HttpServer(ctx context.Context, cfg *config.Config) {
+	// waitGroup add
+	wg := config.GetWaitGroupInCtx(ctx)
+	wg.Add(1)
+	defer wg.Done()
+
 	// New Mux
 	gwmux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}

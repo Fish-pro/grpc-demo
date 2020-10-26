@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
 	"github.com/Fish-pro/grpc-demo/config"
 	"github.com/Fish-pro/grpc-demo/server"
 	"log"
@@ -16,20 +13,21 @@ func RunServer() error {
 	// New Configuration information
 	cfg := config.New()
 	// New context information
-	ctx := context.Background()
+	ctx := cfg.Ctx
+	defer func() {
+		cfg.Cancel()
+		config.GetWaitGroupInCtx(ctx).Wait() // wait for goroutine cancel
+	}()
 
 	// add database connect information
-	param := "parseTime=true"
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", cfg.Db.User, cfg.Db.Password, cfg.Db.Host, cfg.Db.DbSchema, param)
-	db, err := sql.Open("mysql", dsn)
-	log.Println("database info>>>", dsn)
+	db, err := config.InitDb(cfg)
 	if err != nil {
-		return fmt.Errorf("failed to connect to mysql:%s", err.Error())
+		return err
 	}
 	defer db.Close()
 
 	// grpc server
-	go server.GRPCServer(ctx, db, cfg)
+	go server.GRPCServer(ctx, cfg, db)
 
 	// http server
 	go server.HttpServer(ctx, cfg)

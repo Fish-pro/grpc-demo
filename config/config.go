@@ -1,11 +1,19 @@
 package config
 
 import (
+	"context"
 	"log"
 	"os"
+	"sync"
+)
+
+const (
+	ctxKeyWaitGroup = "waitGroup"
 )
 
 type Config struct {
+	Ctx      context.Context
+	Cancel   context.CancelFunc
 	Host     string
 	GRPCPort string
 	HttpPort string
@@ -18,6 +26,14 @@ type Db struct {
 	User     string
 	Password string
 	DbSchema string
+}
+
+func GetWaitGroupInCtx(ctx context.Context) *sync.WaitGroup {
+	if wg, ok := ctx.Value(ctxKeyWaitGroup).(*sync.WaitGroup); ok {
+		return wg
+	}
+
+	return nil
 }
 
 func getBaseDir() string {
@@ -37,7 +53,11 @@ func getEnvOrDefault(key string, def string) string {
 }
 
 func New() *Config {
+	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), ctxKeyWaitGroup, new(sync.WaitGroup)))
+
 	return &Config{
+		Ctx:      ctx,
+		Cancel:   cancel,
 		BaseDir:  getBaseDir(),
 		Host:     getEnvOrDefault("RUN_HOST", "localhost"),
 		GRPCPort: getEnvOrDefault("GRPC_PORT", "8081"),
