@@ -1,5 +1,9 @@
 # grpc-demo
 It's a `gRPC` demo, include server client and client-rest, run server, can start `gRPCServer` and `httpServer`
+## Run server
+```bash
+make run
+```
 ## make .go file
 ```bash
 sh gen.sh
