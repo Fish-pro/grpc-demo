@@ -29,7 +29,7 @@ x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client
 ```
 ## Swagger
 Run server and access <http://localhost:8080/api/>
-## Config
+## Configuration
 The configuration can be modified by configuring environment variables
 
 | Environment variable name | Description                      | Default                     |
