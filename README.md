@@ -24,4 +24,4 @@ req -new -key client.key -out client.csr
 x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -out client.pem
 ```
 ## Swagger
-Run server and access [apiList](http://localhost:8080/api/)
+Run server and access <http://localhost:8080/api/>
