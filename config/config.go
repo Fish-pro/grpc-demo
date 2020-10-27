@@ -85,15 +85,15 @@ func New() *Config {
 		BaseDir:    getBaseDir(),
 		Host:       getEnvOrDefault("RUN_HOST", "localhost"),
 		GRPCPort:   getEnvOrDefault("GRPC_PORT", "8081"),
-		HttpPort:   getEnvOrDefault("GRPC_PORT", "8080"),
+		HttpPort:   getEnvOrDefault("HTTP_PORT", "8080"),
 		OpenPem:    toBool(getEnvOrDefault("OPEN_PEM", "true")),
 		LogLevel:   toIntOrDie(getEnvOrDefault("LOG_LEVEL", "-1")),
 		TimeFormat: getEnvOrDefault("TIME_FORMAT", "2006-01-02 15:04:05"),
 		Db: &Db{
-			Host:     getEnvOrDefault("GRPC_HOST", "127.0.0.1:3306"),
+			Host:     getEnvOrDefault("GRPC_DB_HOST", "127.0.0.1:3306"),
 			User:     getEnvOrDefault("GRPC_DB_USER", "root"),
 			Password: getEnvOrDefault("GRPC_DB_PASSWORD", "dangerous"),
-			DbSchema: getEnvOrDefault("GRPC_DB_SCHEMA", "grpc-demo"),
+			DbSchema: getEnvOrDefault("GRPC_DB_NAME", "grpc-demo"),
 		},
 		Cert: &Certificate{
 			CaPath:  getEnvOrDefault("CA_PATH", "/Users/york/go/src/github.com/Fish-pro/grpc-demo/cert/ca.pem"),
