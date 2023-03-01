@@ -19,13 +19,13 @@ Server certificate
 ```bash
 openssl genrsa -out server.key 2048
 openssl req -new -key server.key -out server.csr // 本地使用localhost作为域名
-x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in server.csr -out server.pem
+openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in server.csr -out server.pem
 ```
 Client certificate
 ```bash
 openssl ecparam -genkey -name secp384r1 -out client.key
 openssl req -new -key client.key -out client.csr
-x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -out client.pem
+openssl x509 -req -sha256 -CA ca.pem -CAkey ca.key -CAcreateserial -days 3650 -in client.csr -out client.pem
 ```
 ## Swagger
 Run server and access <http://localhost:8080/api/>
